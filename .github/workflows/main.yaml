@@ -1,0 +1,55 @@
+# name: appECS
+
+# on:
+#   push:
+#     branches: [main]
+
+# jobs:
+#   create-docker-image:
+#     name: Build and push Docker image
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: Confifure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v1
+#         with:
+#           aws_access_key_id: ${{secrets.AWS_ACCESS_KEY_ID}}
+#           aws_secret_access_key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+#           aws_region: us-east-1
+
+#       - name: Login to Amazon ECR
+#         id: login-erc
+#         uses: aws-actions/amazon-ecr-login@v1
+
+#       - name: Build, tag, and push image to Amazon ECR
+#         id: build image
+#         env: 
+#           ECR_REGISTRY: ${{ steps.login-erc.outputs.registry }}
+#           ECR_REPOSITORY: app-ecs
+#           IMAGE_TAG: latest
+#         run: |
+#           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+#           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+#   deploy-ecs:
+#     name: Deploy to Amazon ECS
+#     runs-on: ubuntu-latest
+#     needs: create-docker-image
+#     steps:
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v1
+#         with:
+#           aws_access_key_id: ${{secrets.AWS_ACCESS_KEY_ID}}
+#           aws_secret_access_key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+#           aws_region: us-east-1
+
+#       - name: Deploy to Amazon ECS
+#         id: deploy-ecs
+#         uses: aws-actions/amazon-ecs-deploy-task@v1
+#         with:
+#           cluster: app-ecs-cluster
+#           service: app-ecs-service
+#           task-definition: app-ecs-task-definition
+#           container-image-name: ${{ steps.create-docker-image.outputs.ECR_REGISTRY }}/app-ecs:latest
+#           container-name: app-ecs
+#           container-port: 8080
